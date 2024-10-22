@@ -45,22 +45,26 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set Release Tag
-        id: vars
+      # Fetch the latest tag created in the repository
+      - name: Get Latest Tag
+        id: get_tag
         run: |
-          echo "TAG=${{ github.event.inputs.tag_version }}" >> $GITHUB_ENV
+          # Retrieve the most recent tag
+          TAG=$(git describe --tags --abbrev=0)
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "Latest tag is: $TAG"
 
       - name: Extract Release Notes from CHANGELOG.md
         id: extract_notes
         shell: bash
         run: |
-          TAG_VERSION="${{ env.TAG#v }}"  # Remove 'v' prefix if present
+          TAG_VERSION="${TAG#v}"  # Remove 'v' prefix if present
           
           # Extract release notes for the current version
           RELEASE_NOTES=$(awk '/^## \[?'"$TAG_VERSION"'\]?/{flag=1;next}/^## /{flag=0}flag' CHANGELOG.md)
           
           if [ -z "$RELEASE_NOTES" ]; then
-            echo "Error: Release notes for tag $TAG_VERSION not found in CHANGELOG.md"
+            echo "Error: Release notes for tag $TAG not found in CHANGELOG.md"
             exit 1
           fi
 
