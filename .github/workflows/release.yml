@@ -142,9 +142,11 @@ jobs:
         id: set_tags
         run: |
           TAGS="ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ env.TAG }}"
+          # Check for additional tag and ensure it is not empty
           if [ -n "${{ github.event.inputs.additional_tag }}" ]; then
             TAGS="$TAGS,ghcr.io/${{ github.repository }}:${{ github.event.inputs.additional_tag }}"
           else
+            # Add date-based tag if no additional tag is provided
             TAGS="$TAGS,ghcr.io/${{ github.repository }}:${{ steps.date.outputs.date }}"
           fi
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
@@ -157,4 +159,3 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ steps.set_tags.outputs.tags }}
-    
