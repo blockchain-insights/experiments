@@ -1,0 +1,5 @@
+pytest
+loguru
+sqlalchemy
+pytest-cov
+mock
