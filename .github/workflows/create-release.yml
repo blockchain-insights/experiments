@@ -44,10 +44,29 @@ jobs:
           fi
           echo "TAG=$TAG" >> $GITHUB_ENV
 
+      - name: Extract Release Notes from CHANGELOG.md
+        id: extract_notes
+        shell: bash
+        run: |
+          TAG_VERSION="${TAG#v}"  # Remove 'v' prefix if present
+          
+          # Extract release notes for the current version
+          RELEASE_NOTES=$(awk '/^## \[?'"$TAG_VERSION"'\]?/{flag=1;next}/^## /{flag=0}flag' CHANGELOG.md)
+          
+          if [ -z "$RELEASE_NOTES" ]; then
+            echo "Error: Release notes for tag $TAG not found in CHANGELOG.md"
+            exit 1
+          fi
+
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$RELEASE_NOTES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Create Release
         uses: actions/create-release@v1
         with:
           tag_name: ${{ env.TAG }}
           release_name: Release ${{ env.TAG }}
+          body: ${{ env.RELEASE_NOTES }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
