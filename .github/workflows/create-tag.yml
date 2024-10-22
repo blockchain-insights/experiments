@@ -45,7 +45,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const workflowId = 'create_release.yml';  // Ensure the release workflow file name is correct
+            const workflowId = 'create-release.yml';
             const ref = 'main';  // The branch or ref you want to run the release on
             const tag = "${{ github.event.inputs.tag_version }}";  // Correct tag version
 
