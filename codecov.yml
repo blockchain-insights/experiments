@@ -1,6 +1,0 @@
-coverage:
-  status:
-    project:
-      default:
-        threshold: 0  # Set threshold to 0, meaning no minimum coverage required
-        informational: true  # Mark coverage as informational, so it doesn't cause failures
