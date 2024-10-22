@@ -8,6 +8,9 @@ on:
         description: 'Tag version (e.g., 1.0.0)'
         required: true
         default: '1.0.0'  # Default version (optional)
+      additional_tag:
+        description: 'Additional tag (optional)'
+        required: false
 
 permissions:
   contents: write
@@ -137,18 +140,17 @@ jobs:
         id: date
         run: echo "date=$(date +'%Y-%m-%d-%H')" >> $GITHUB_OUTPUT
 
-      # Set the tags for the Docker image
+      # Set the tags for the Docker image, filter out any empty tags
       - name: Set Docker Tags
         id: set_tags
         run: |
           TAGS="ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ env.TAG }}"
-          # Check for additional tag and ensure it is not empty
-          if [ -n "${{ github.event.inputs.additional_tag }}" ]; then
+          # Check for additional tag and ensure it is not empty or invalid
+          if [ -n "${{ github.event.inputs.additional_tag }}" ] && [ "${{ github.event.inputs.additional_tag }}" != "null" ]; then
             TAGS="$TAGS,ghcr.io/${{ github.repository }}:${{ github.event.inputs.additional_tag }}"
-          else
-            # Add date-based tag if no additional tag is provided
-            TAGS="$TAGS,ghcr.io/${{ github.repository }}:${{ steps.date.outputs.date }}"
           fi
+          # Add date-based tag if no additional valid tag is provided
+          TAGS="$TAGS,ghcr.io/${{ github.repository }}:${{ steps.date.outputs.date }}"
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       # Build and push the Docker image
