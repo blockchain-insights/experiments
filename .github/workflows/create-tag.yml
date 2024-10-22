@@ -32,11 +32,11 @@ jobs:
           # Get the tag version from the input
           tag_version="${{ github.event.inputs.tag_version }}"
 
-          # Create the new tag locally
-          git tag $tag_version
+          # Create or update the tag locally
+          git tag -f $tag_version
 
-          # Push the new tag to the repository
-          git push origin $tag_version
+          # Force push the new tag to the repository, overwriting if it exists
+          git push origin $tag_version --force
 
       # Trigger the Create Release workflow after the tag is created
       - name: Trigger Create Release Workflow
