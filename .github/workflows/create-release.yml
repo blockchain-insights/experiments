@@ -8,6 +8,7 @@ on:
     inputs:
       tag:
         description: 'Tag to create a release for'
+        default: '1.0.0'
         required: false
 
 permissions:
