@@ -7,7 +7,7 @@ on:
       tag_version:
         description: 'Tag version (e.g., 1.0.0)'
         required: true
-        default: '1.0.0'  # Default version (optional)
+        default: '1.0.0'
 
 permissions:
   contents: write
@@ -20,6 +20,10 @@ jobs:
       # Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
+
+      # Fetch all tags (this ensures we have the latest tag list)
+      - name: Fetch all tags
+        run: git fetch --tags
 
       # Create a new tag based on the input version
       - name: Create and Push Tag
@@ -45,12 +49,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Fetch the latest tag created in the repository
+      # Fetch all tags to ensure the latest tag is present
+      - name: Fetch tags
+        run: git fetch --tags
+
+      # Retrieve the latest tag
       - name: Get Latest Tag
         id: get_tag
         run: |
-          # Retrieve the most recent tag
-          TAG=$(git describe --tags --abbrev=0)
+          # Fetch the most recent tag. If no tags exist, exit gracefully.
+          TAG=$(git tag --list --sort=-creatordate | head -n 1)
+          if [ -z "$TAG" ]; then
+            echo "Error: No tags found."
+            exit 1
+          fi
           echo "TAG=$TAG" >> $GITHUB_ENV
           echo "Latest tag is: $TAG"
 
