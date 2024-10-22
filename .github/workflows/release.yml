@@ -112,3 +112,6 @@ jobs:
           body: ${{ env.RELEASE_NOTES }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    create_docker_image:
+    
