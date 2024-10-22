@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       tag_version:
-        description: 'Tag version (e.g., v.0.0)'
+        description: 'Tag version (e.g., v1.0.0)'
         required: true
-        default: '1.0.0'  # Default version (optional, you can omit this)
+        default: '1.0.0'  # Default version (optional)
 
 permissions:
   contents: write
@@ -37,3 +37,18 @@ jobs:
 
           # Push the new tag to the repository
           git push origin $tag_version
+
+      # Trigger the Create Release workflow after the tag is created
+      - name: Trigger Create Release Workflow
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'create_release.yml',  # Make sure this matches the release workflow file name
+              ref: 'main',  # Specify the branch or ref where the workflow runs
+              inputs: {
+                tag: "$tag_version"  # Pass the tag version to the release workflow
+              }
+            })
