@@ -9,6 +9,9 @@ on:
         required: true
         default: 'v1.0.0'  # Default version (optional, you can omit this)
 
+permissions:
+  contents: write
+  
 jobs:
   create_tag:
     runs-on: ubuntu-latest
