@@ -7,7 +7,7 @@ on:
       tag_version:
         description: 'Tag version (e.g., 1.0.0)'
         required: true
-        default: '1.0.0'
+        default: '1.0.0'  # Default version (optional)
 
 permissions:
   contents: write
@@ -65,6 +65,26 @@ jobs:
           fi
           echo "TAG=$TAG" >> $GITHUB_ENV
           echo "Latest tag is: $TAG"
+
+      # Check if the release already exists and delete it if needed
+      - name: Delete existing release if exists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the release ID associated with the tag
+          release_id=$(curl -s \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} \
+            | jq -r .id)
+          
+          if [ "$release_id" != "null" ]; then
+            echo "Release with tag $TAG exists. Deleting it..."
+            curl -X DELETE \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              https://api.github.com/repos/${{ github.repository }}/releases/$release_id
+          else
+            echo "No existing release found for tag $TAG."
+          fi
 
       - name: Extract Release Notes from CHANGELOG.md
         id: extract_notes
