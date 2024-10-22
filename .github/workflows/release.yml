@@ -141,7 +141,7 @@ jobs:
       - name: Set Docker Tags
         id: set_tags
         run: |
-          TAGS="ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ env.TAG }}"
+          TAGS="ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ github.event.inputs.tag_version }}"
           # Add date-based tag for tracking builds by date
           TAGS="$TAGS,ghcr.io/${{ github.repository }}:${{ steps.date.outputs.date }}"
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
