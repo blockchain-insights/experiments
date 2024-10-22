@@ -1,0 +1,36 @@
+name: Manual Tag Creation
+
+# Allows the workflow to be triggered manually
+on:
+  workflow_dispatch:
+    inputs:
+      tag_version:
+        description: 'Tag version (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'  # Default version (optional, you can omit this)
+
+jobs:
+  create_tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Create a new tag based on the input version
+      - name: Create and Push Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub automatically provides this
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Get the tag version from the input
+          tag_version="${{ github.event.inputs.tag_version }}"
+
+          # Create the new tag locally
+          git tag $tag_version
+
+          # Push the new tag to the repository
+          git push origin $tag_version
