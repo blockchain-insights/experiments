@@ -1,17 +1,21 @@
 name: Create Release
 
-# Trigger this workflow when a new tag is pushed
+# Trigger on push of tags and also allow manual triggering
 on:
   push:
     tags:
-      - 'v*'  # This will trigger the workflow for tags starting with 'v'
+      - 'v*'  # Automatically trigger on any tag starting with 'v'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag version (e.g., v1.0.0)'
+        required: true
 
 jobs:
   release:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -24,12 +28,13 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ github.ref }}  # The tag that triggered the workflow
-          release_name: ${{ github.ref }}  # Same name as the tag
-          draft: false  # Set to true if you want to create a draft release
-          prerelease: false  # Set to true if this is a pre-release
+          tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}  # Manual input or tag from push
+          release_name: ${{ github.event.inputs.tag_name || github.ref_name }}  # Same as the tag name
+          draft: false  # Always set to false (not a draft)
+          prerelease: false  # Always set to false (not a pre-release)
 
       # Generate release notes
       - name: Generate Release Notes
         run: |
-          gh release create ${{ github.ref }} --notes "Automatically generated release notes for ${{ github.ref }}"
+          gh release create ${{ github.event.inputs.tag_name || github.ref_name }} \
+          --notes "Automatically generated release notes for ${{ github.event.inputs.tag_name || github.ref_name }}"
