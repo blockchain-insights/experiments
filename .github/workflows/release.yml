@@ -7,7 +7,7 @@ on:
       tag_version:
         description: 'Tag version (e.g., v1.0.0)'
         required: true
-        default: '1.0.0'  # Default version (optional)
+        default: 'v1.0.0'  # Default version (optional)
 
 permissions:
   contents: write
@@ -45,39 +45,22 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Determine Tag
+      - name: Set Release Tag
         id: vars
-        shell: bash
-        env:
-          INPUT_TAG: ${{ github.event.inputs.tag }}
-          GITHUB_REF: ${{ github.ref }}
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]; then
-            if [ -z "$INPUT_TAG" ]; then
-              echo "Error: No tag provided in workflow dispatch."
-              exit 1
-            fi
-            TAG="$INPUT_TAG"
-          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            TAG="${GITHUB_REF#refs/tags/}"
-          else
-            echo "Error: No tag found."
-            exit 1
-          fi
-          echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "TAG=${{ github.event.inputs.tag_version }}" >> $GITHUB_ENV
 
       - name: Extract Release Notes from CHANGELOG.md
         id: extract_notes
         shell: bash
         run: |
-          TAG_VERSION="${TAG#v}"  # Remove 'v' prefix if present
+          TAG_VERSION="${{ env.TAG#v }}"  # Remove 'v' prefix if present
           
           # Extract release notes for the current version
           RELEASE_NOTES=$(awk '/^## \[?'"$TAG_VERSION"'\]?/{flag=1;next}/^## /{flag=0}flag' CHANGELOG.md)
           
           if [ -z "$RELEASE_NOTES" ]; then
-            echo "Error: Release notes for tag $TAG not found in CHANGELOG.md"
+            echo "Error: Release notes for tag $TAG_VERSION not found in CHANGELOG.md"
             exit 1
           fi
 
@@ -93,5 +76,3 @@ jobs:
           body: ${{ env.RELEASE_NOTES }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
-          
